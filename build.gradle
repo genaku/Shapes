@@ -1,0 +1,100 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    ext.kotlin_version = '1.2.41'
+    ext.kotlinVersion = '1.2.41'
+    ext.objectBoxVersion = '1.4.1' // check for latest version
+    ext.gradleVersion = '3.1.1'
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.1.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+apply plugin: 'kotlin'
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}
+
+ext {
+
+    versionMajor = 1
+    versionMinor = 0
+    versionPatch = 0
+
+    versionCode = 1000 * versionMajor + 100 * versionMinor + versionPatch
+
+    //Android
+    androidBuildToolsVersion = "27.0.3"
+    androidMinSdkVersion = 19
+    androidTargetSdkVersion = 27
+    androidCompileSdkVersion = 27
+    androidSupportVersion = "27.1.1"
+    androidConstraintLayoutVersion = "1.1.0"
+    androidArchVersion = "1.1.1"
+
+    //Libraries
+    ankoVersion = '0.10.5'
+    plogVersion = '2.0.0'
+    commonsVersion = '2.5'
+    uspekVersion = '-SNAPSHOT'
+
+    //Testing
+    robolectricVersion = '3.4.2'
+    jUnitVersion = '4.12'
+    assertJVersion = '3.8.0'
+    mockitoVersion = '1.9.5'
+    dexmakerVersion = '1.0'
+    espressoVersion = '3.0.0'
+    testingSupportLibVersion = '0.1'
+    mockitoKotlinVersion = '1.5.0'
+    mockitoAndroidVersion = '2.8.47'
+    androidSupportRunnerVersion = '1.0.0'
+    androidSupportRulesVersion = '1.0.0'
+    dexmakerMockitoVersion = '2.2.0'
+    runnerVersion = '0.5'
+
+    commonDependencies = [
+            androidSupport4: "com.android.support:support-v4:$androidSupportVersion",
+            kotlin         : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",
+            plog           : "org.mym.plog:plog-core:$plogVersion"
+    ]
+
+    commonTestDependencies = [
+            uspek: "com.github.genaku:USpek:$uspekVersion"
+    ]
+
+    appDependencies = [
+            appcompat7             : "com.android.support:appcompat-v7:$androidSupportVersion",
+            anko                   : "org.jetbrains.anko:anko:$ankoVersion",
+            acrhLifecycleRuntime   : "android.arch.lifecycle:runtime:$androidArchVersion",
+            archLifecycleExtensions: "android.arch.lifecycle:extensions:$androidArchVersion",
+    ]
+
+}
+
+repositories {
+    mavenCentral()
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}

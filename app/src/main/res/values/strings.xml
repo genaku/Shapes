@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Shapes</string>
+
+    <string name="triangle">Triangle</string>
+    <string name="oval">Oval</string>
+    <string name="rectangle">Rectangle</string>
+    <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
+    <string name="delete">Delete</string>
+
+</resources>

@@ -1,0 +1,1 @@
+include ':app', ':domain', ':presenters', ':interactors', ':repository', ':repository'

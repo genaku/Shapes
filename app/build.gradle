@@ -1,0 +1,75 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+android {
+    def globalConfiguration = rootProject.extensions.getByName("ext")
+
+    compileSdkVersion globalConfiguration["androidCompileSdkVersion"]
+    buildToolsVersion globalConfiguration["androidBuildToolsVersion"]
+
+    defaultConfig {
+        applicationId "com.gena.shapes"
+        minSdkVersion globalConfiguration["androidMinSdkVersion"]
+        targetSdkVersion globalConfiguration["androidTargetSdkVersion"]
+        versionCode rootProject.ext.versionCode
+        versionName "${versionMajor}.${versionMinor}"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+    }
+    buildTypes {
+        release {
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+//    dataBinding.enabled true
+}
+
+configurations.all {
+    resolutionStrategy {
+        force "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    }
+}
+
+dependencies {
+    implementation project(path: ':domain')
+    implementation project(path: ':repository')
+    implementation project(path: ':presenters')
+    implementation project(path: ':interactors')
+
+    implementation commonDependencies.kotlin
+    implementation commonDependencies.plog
+    implementation commonDependencies.androidSupport4
+
+    implementation appDependencies.appcompat7
+    implementation appDependencies.acrhLifecycleRuntime
+    implementation appDependencies.archLifecycleExtensions
+    implementation appDependencies.anko
+
+    testImplementation commonTestDependencies.uspek
+}
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
+}
