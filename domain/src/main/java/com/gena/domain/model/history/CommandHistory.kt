@@ -2,6 +2,7 @@ package com.gena.domain.model.history
 
 import com.gena.domain.model.ObservableModel
 import com.gena.domain.model.ShapeException
+import com.gena.domain.model.ShapeExceptionError
 import com.gena.domain.model.ShapesModel
 
 /**
@@ -51,7 +52,7 @@ class CommandHistory(
             mHistoryPos--
             notifyChanged()
         } else {
-            throw ShapeException(ShapeException.UNDO_NOT_AVAILABLE)
+            throw ShapeException(ShapeExceptionError.UNDO_NOT_AVAILABLE)
         }
     }
 
@@ -62,7 +63,7 @@ class CommandHistory(
             mHistoryPos++
             notifyChanged()
         } else {
-            throw ShapeException(ShapeException.REDO_NOT_AVAILABLE)
+            throw ShapeException(ShapeExceptionError.REDO_NOT_AVAILABLE)
         }
     }
 

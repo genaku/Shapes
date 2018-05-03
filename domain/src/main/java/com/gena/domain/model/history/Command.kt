@@ -1,6 +1,7 @@
 package com.gena.domain.model.history
 
 import com.gena.domain.model.ShapeException
+import com.gena.domain.model.ShapeExceptionError
 import com.gena.domain.model.ShapesModel
 
 /**
@@ -18,7 +19,7 @@ abstract class Command {
     @Throws(ShapeException::class)
     fun execute(model: ShapesModel) {
         if (mExecuted)
-            throw ShapeException(ShapeException.COMMAND_EXECUTED)
+            throw ShapeException(ShapeExceptionError.COMMAND_EXECUTED)
         doExecute(model)
         mExecuted = true
     }
@@ -26,7 +27,7 @@ abstract class Command {
     @Throws(ShapeException::class)
     fun unexecute(model: ShapesModel) {
         if (!mExecuted)
-            throw ShapeException(ShapeException.COMMAND_NOT_EXECUTED)
+            throw ShapeException(ShapeExceptionError.COMMAND_NOT_EXECUTED)
         undoExecute(model)
         mExecuted = false
     }

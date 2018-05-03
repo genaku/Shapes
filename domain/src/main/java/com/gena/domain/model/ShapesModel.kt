@@ -44,7 +44,7 @@ class ShapesModel(
     @Throws(ShapeException::class)
     private fun checkIndex(idx: Int) {
         if (idx < 0 || idx >= shapes.size)
-            throw ShapeException(ShapeException.INDEX_OUT_OF_MODEL_LIST)
+            throw ShapeException(ShapeExceptionError.INDEX_OUT_OF_MODEL_LIST)
     }
 
     @Throws(ShapeException::class)
