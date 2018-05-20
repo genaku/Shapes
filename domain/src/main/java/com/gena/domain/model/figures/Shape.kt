@@ -83,29 +83,27 @@ abstract class Shape(val data: ShapeData) : Serializable {
         return true
     }
 
-    fun moveShape(newX: Int, newY: Int, mode: ShapeMoveMode): Boolean {
-        return when (mode) {
-            ShapeMoveMode.BODY ->
-                dualMove({ moveX(newX) }, { moveY(newY) })
-            ShapeMoveMode.LEFT_UPPER_CORNER ->
-                dualMove({ shiftLeftSide(newX) }, { shiftTopSide(newY) })
-            ShapeMoveMode.LEFT_BOTTOM_CORNER ->
-                dualMove({ shiftLeftSide(newX) }, { shiftBottomSide(newY) })
-            ShapeMoveMode.RIGHT_UPPER_CORNER ->
-                dualMove({ shiftRightSide(newX) }, { shiftTopSide(newY) })
-            ShapeMoveMode.RIGHT_BOTTOM_CORNER ->
-                dualMove({ shiftRightSide(newX) }, { shiftBottomSide(newY) })
-            ShapeMoveMode.LEFT_SIDE ->
-                shiftLeftSide(newX)
-            ShapeMoveMode.RIGHT_SIDE ->
-                shiftRightSide(newX)
-            ShapeMoveMode.TOP_SIDE ->
-                shiftTopSide(newY)
-            ShapeMoveMode.BOTTOM_SIDE ->
-                shiftBottomSide(newY)
-            ShapeMoveMode.NOTHING ->
-                false
-        }
+    fun moveShape(newX: Int, newY: Int, mode: ShapeMoveMode): Boolean = when (mode) {
+        ShapeMoveMode.BODY ->
+            dualMove({ moveX(newX) }, { moveY(newY) })
+        ShapeMoveMode.LEFT_UPPER_CORNER ->
+            dualMove({ shiftLeftSide(newX) }, { shiftTopSide(newY) })
+        ShapeMoveMode.LEFT_BOTTOM_CORNER ->
+            dualMove({ shiftLeftSide(newX) }, { shiftBottomSide(newY) })
+        ShapeMoveMode.RIGHT_UPPER_CORNER ->
+            dualMove({ shiftRightSide(newX) }, { shiftTopSide(newY) })
+        ShapeMoveMode.RIGHT_BOTTOM_CORNER ->
+            dualMove({ shiftRightSide(newX) }, { shiftBottomSide(newY) })
+        ShapeMoveMode.LEFT_SIDE ->
+            shiftLeftSide(newX)
+        ShapeMoveMode.RIGHT_SIDE ->
+            shiftRightSide(newX)
+        ShapeMoveMode.TOP_SIDE ->
+            shiftTopSide(newY)
+        ShapeMoveMode.BOTTOM_SIDE ->
+            shiftBottomSide(newY)
+        ShapeMoveMode.NOTHING ->
+            false
     }
 
     private fun dualMove(byX: () -> Boolean, byY: () -> Boolean): Boolean {

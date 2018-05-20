@@ -71,6 +71,10 @@ class UseCase(
     override fun addShape(type: ShapeType, x0: Int, y0: Int) =
             mHistory.doCommand(CommandCreate(type, x0, y0), true)
 
+    override fun addPicture(x0: Int, y0: Int, filename: String) {
+//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private fun updateMenuCommandsAvailability() {
         mMenuCommands[MenuCommand.REDO] = mHistory.canRedo
         mMenuCommands[MenuCommand.UNDO] = mHistory.canUndo

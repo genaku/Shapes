@@ -30,6 +30,10 @@ class Interactor(private val useCase: IUseCase) : IInteractor {
         }
     }
 
+    override fun addPicture(x0: Int, y0: Int, filename: String) {
+//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun deleteSelected() {
         mCommandActor.offer {
             useCase.deleteSelected()

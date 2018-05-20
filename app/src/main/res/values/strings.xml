@@ -5,8 +5,11 @@
     <string name="triangle">Triangle</string>
     <string name="oval">Oval</string>
     <string name="rectangle">Rectangle</string>
+    <string name="picture">Picture</string>
     <string name="undo">Undo</string>
     <string name="redo">Redo</string>
     <string name="delete">Delete</string>
+    <string name="rationale_ask_again">Open Settings, then tap Permissions and turn on Storage.</string>
+    <string name="title_settings_dialog" translatable="false"></string>
 
 </resources>

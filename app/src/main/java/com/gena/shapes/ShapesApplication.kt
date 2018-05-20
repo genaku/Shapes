@@ -3,6 +3,7 @@ package com.gena.shapes
 import android.app.Application
 import com.gena.domain.usecases.interfaces.IRepository
 import com.genaku.repository.Repository
+import com.squareup.leakcanary.LeakCanary
 import org.mym.plog.DebugPrinter
 import org.mym.plog.PLog
 import org.mym.plog.config.PLogConfig
@@ -15,6 +16,12 @@ class ShapesApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            // This process is dedicated to LeakCanary for heap analysis.
+            // You should not init your app in this process.
+            return
+        }
+        LeakCanary.install(this)
         PLog.init(PLogConfig.Builder()
                 .forceConcatGlobalTag(true)
                 .needLineNumber(true)

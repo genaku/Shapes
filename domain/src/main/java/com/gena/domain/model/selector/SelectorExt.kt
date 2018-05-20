@@ -1,9 +1,6 @@
 package com.gena.domain.model.selector
 
-import com.gena.domain.model.figures.Oval
-import com.gena.domain.model.figures.Rectangle
-import com.gena.domain.model.figures.Shape
-import com.gena.domain.model.figures.Triangle
+import com.gena.domain.model.figures.*
 
 /**
  * Created by Gena Kuchergin on 03.02.2018.
@@ -13,6 +10,7 @@ fun Shape.contains(x: Int, y: Int): Boolean = when (this) {
     is Rectangle -> contains(x, y)
     is Oval -> contains(x, y)
     is Triangle -> contains(x, y)
+    is Picture -> contains(x, y)
     else -> false
 }
 
@@ -62,3 +60,7 @@ fun Triangle.contains(x: Int, y: Int): Boolean {
 
     return false
 }
+
+fun Picture.contains(x: Int, y: Int): Boolean =
+        (x in left..right && y in top..bottom)
+

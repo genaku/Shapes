@@ -3,18 +3,23 @@
     <group>
         <item
             android:id="@+id/action_triangle"
-            android:icon="@drawable/ic_change_history_white_48dp"
+            android:icon="@drawable/triangle"
             android:title="@string/triangle"
             app:showAsAction="always" />
         <item
             android:id="@+id/action_oval"
-            android:icon="@drawable/ic_panorama_fish_eye_white_48dp"
+            android:icon="@drawable/oval"
             android:title="@string/oval"
             app:showAsAction="always" />
         <item
             android:id="@+id/action_rectangle"
-            android:icon="@drawable/ic_crop_square_white_48dp"
+            android:icon="@drawable/rectangle"
             android:title="@string/rectangle"
+            app:showAsAction="always" />
+        <item
+            android:id="@+id/action_picture"
+            android:icon="@drawable/photo_48px"
+            android:title="@string/picture"
             app:showAsAction="always" />
     </group>
     <group>
@@ -22,16 +27,16 @@
             android:id="@+id/action_undo"
             android:icon="@drawable/ic_undo_white_48dp"
             android:title="@string/undo"
-            app:showAsAction="always" />
+            app:showAsAction="ifRoom" />
         <item
             android:id="@+id/action_redo"
             android:icon="@drawable/ic_redo_white_48dp"
             android:title="@string/redo"
-            app:showAsAction="always" />
+            app:showAsAction="ifRoom" />
         <item
             android:id="@+id/action_delete"
             android:icon="@drawable/ic_delete_sweep_white_48dp"
             android:title="@string/delete"
-            app:showAsAction="always" />
+            app:showAsAction="ifRoom" />
     </group>
 </menu>

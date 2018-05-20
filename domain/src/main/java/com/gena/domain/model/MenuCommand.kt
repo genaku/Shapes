@@ -8,6 +8,7 @@ enum class MenuCommand {
     ADD_TRIANGLE,
     ADD_RECTANGLE,
     ADD_OVAL,
+    ADD_PICTURE,
     REDO,
     UNDO,
     DELETE

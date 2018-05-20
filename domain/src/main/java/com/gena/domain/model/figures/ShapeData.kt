@@ -10,7 +10,8 @@ import java.io.Serializable
 data class ShapeData(
         val type: ShapeType,
         val xValues: ArrayList<Int>,
-        val yValues: ArrayList<Int>
+        val yValues: ArrayList<Int>,
+        val filename: String = ""
 ) : Serializable {
     companion object {
         private const val serialVersionUID = 4004118283591821125L
