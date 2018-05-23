@@ -1,6 +1,7 @@
 package com.gena.presenters.interfaces
 
 import android.support.v4.util.ArrayMap
+import com.gena.domain.consts.ShapeError
 import com.gena.domain.model.MenuCommand
 import com.gena.domain.model.ShapesModel
 
@@ -11,4 +12,5 @@ import com.gena.domain.model.ShapesModel
 interface IShapesViewModel {
     fun showMenuCommands(value: ArrayMap<MenuCommand, Boolean>)
     fun refreshShapes(shapes: ShapesModel)
+    fun showError(error: ShapeError)
 }

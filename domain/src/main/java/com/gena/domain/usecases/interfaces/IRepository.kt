@@ -1,6 +1,7 @@
 package com.gena.domain.usecases.interfaces
 
 import com.gena.domain.model.ShapesModel
+import com.gena.domain.model.figures.PictureData
 import com.gena.domain.model.history.CommandHistory
 
 /**
@@ -11,4 +12,5 @@ interface IRepository {
     val history: CommandHistory
     fun saveModel(model: ShapesModel)
     fun loadModel(): ShapesModel
+    fun loadPictureIntoRepository(filename: String): PictureData
 }

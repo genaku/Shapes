@@ -1,14 +1,12 @@
 package com.gena.domain.usecases
 
 import android.support.v4.util.ArrayMap
+import com.gena.domain.consts.ShapeError
 import com.gena.domain.consts.ShapeMoveMode
 import com.gena.domain.consts.ShapeType
 import com.gena.domain.model.MenuCommand
 import com.gena.domain.model.ShapesModel
-import com.gena.domain.model.history.CommandCreate
-import com.gena.domain.model.history.CommandDelete
-import com.gena.domain.model.history.CommandHistory
-import com.gena.domain.model.history.CommandMove
+import com.gena.domain.model.history.*
 import com.gena.domain.model.interfaces.IUseCase
 import com.gena.domain.model.selector.Selector
 import com.gena.domain.usecases.interfaces.IPresenter
@@ -47,6 +45,9 @@ class UseCase(
         updateMenuCommandsAvailability()
     }
 
+    private fun refreshShapes() =
+            presenter.refreshShapes(mModel)
+
     override fun update(observable: Observable?, arg: Any?) {
         when (observable) {
             is ShapesModel -> {
@@ -56,6 +57,13 @@ class UseCase(
                 updateMenuCommandsAvailability()
             }
         }
+    }
+
+    private fun updateMenuCommandsAvailability() {
+        mMenuCommands[MenuCommand.REDO] = mHistory.canRedo
+        mMenuCommands[MenuCommand.UNDO] = mHistory.canUndo
+        mMenuCommands[MenuCommand.DELETE] = mModel.selectedIdx >= 0
+        presenter.showMenuCommands(mMenuCommands)
     }
 
     override fun startObserving() {
@@ -68,31 +76,34 @@ class UseCase(
         mHistory.deleteObserver(this)
     }
 
-    override fun addShape(type: ShapeType, x0: Int, y0: Int) =
-            mHistory.doCommand(CommandCreate(type, x0, y0), true)
+    override fun addShape(type: ShapeType, x0: Int, y0: Int) = tryExecCommand({
+        mHistory.doCommand(CommandCreate(type, x0, y0), true)
+    })
 
-    override fun addPicture(x0: Int, y0: Int, filename: String) {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    private fun tryExecCommand(execCommand: () -> Unit, error: ShapeError = ShapeError.CANT_EXEC_COMMAND) = try {
+        execCommand()
+    } catch (e: Exception) {
+        presenter.showError(error)
     }
 
-    private fun updateMenuCommandsAvailability() {
-        mMenuCommands[MenuCommand.REDO] = mHistory.canRedo
-        mMenuCommands[MenuCommand.UNDO] = mHistory.canUndo
-        mMenuCommands[MenuCommand.DELETE] = mModel.selectedIdx >= 0
-        presenter.showMenuCommands(mMenuCommands)
-    }
+    override fun addPicture(x0: Int, y0: Int, filename: String) = tryExecCommand({
+        val data = repository.loadPictureIntoRepository(filename)
+        mHistory.doCommand(CommandCreatePicture(x0, y0, data), true)
+    })
 
-    private fun refreshShapes() =
-            presenter.refreshShapes(mModel)
+    override fun deleteSelected() = tryExecCommand({
+        mHistory.doCommand(CommandDelete(mModel.selectedIdx), true)
+    })
 
-    override fun deleteSelected() =
-            mHistory.doCommand(CommandDelete(mModel.selectedIdx), true)
+    override fun undo() = tryExecCommand(
+            execCommand = { mHistory.undo() },
+            error = ShapeError.CANT_UNDO
+    )
 
-    override fun undo() =
-            mHistory.undo()
-
-    override fun redo() =
-            mHistory.redo()
+    override fun redo() = tryExecCommand(
+            execCommand = { mHistory.redo() },
+            error = ShapeError.CANT_REDO
+    )
 
     override fun saveModel() {
         repository.saveModel(mModel)
@@ -101,25 +112,31 @@ class UseCase(
     override fun moveSelected(x: Int, y: Int) {
         val idx = mModel.selectedIdx
         // do only when selected
-        if (idx >= 0) {
-            xCurrent = x - dX
-            yCurrent = y - dY
-            if (xCurrent != xOld && yCurrent != yOld)
+        if (idx < 0)
+            return
+        xCurrent = x - dX
+        yCurrent = y - dY
+        if (xCurrent != xOld && yCurrent != yOld) {
+            tryExecCommand({
                 mHistory.doCommand(CommandMove(idx, mMoveMode, xOld, yOld,
                         xCurrent, yCurrent), false)
+            })
         }
     }
 
     override fun movementFinished() {
         val idx = mModel.selectedIdx
         // do only when selected
-        if (idx >= 0) {
-            if (xCurrent != xOld && yCurrent != yOld) {
-                val command = CommandMove(idx, mMoveMode, xOld, yOld,
-                        xCurrent, yCurrent)
-                command.setExecuted(true)
-                mHistory.saveCommand(command)
-            }
+        if (idx < 0)
+            return
+        if (xCurrent != xOld && yCurrent != yOld) {
+            val command = CommandMove(idx, mMoveMode, xOld, yOld,
+                    xCurrent, yCurrent)
+            command.setExecuted(true)
+            tryExecCommand(
+                    execCommand = { mHistory.saveCommand(command) },
+                    error = ShapeError.CANT_SAVE_TO_HISTORY
+            )
         }
     }
 

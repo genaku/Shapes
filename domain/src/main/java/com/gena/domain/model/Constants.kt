@@ -8,6 +8,6 @@ class Constants {
     companion object {
         const val DEFAULT_SIZE = 100
         const val MIN_SIZE = 60
-        const val BORDER_WIDTH = 20
+        const val BORDER_WIDTH = 25
     }
 }

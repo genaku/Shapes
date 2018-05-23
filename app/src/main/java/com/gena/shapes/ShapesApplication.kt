@@ -1,6 +1,9 @@
 package com.gena.shapes
 
 import android.app.Application
+import android.content.Context
+import android.graphics.Point
+import android.view.WindowManager
 import com.gena.domain.usecases.interfaces.IRepository
 import com.genaku.repository.Repository
 import com.squareup.leakcanary.LeakCanary
@@ -30,7 +33,15 @@ class ShapesApplication : Application() {
                 .globalTag("IS")
                 .build())
         PLog.prepare(DebugPrinter(BuildConfig.DEBUG)) //all logs will be automatically disabled on release version
-        repository = Repository(this)
+        repository = Repository(this, getDefaultPictureSize())
+    }
+
+    private fun getDefaultPictureSize(): Int {
+        val wm = applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val display = wm.defaultDisplay
+        val size = Point()
+        display.getSize(size)
+        return Math.min(size.x, size.y) / 3
     }
 
     companion object {

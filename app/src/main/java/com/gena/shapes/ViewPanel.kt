@@ -70,7 +70,7 @@ class ViewPanel : View {
                 is Rectangle -> UIRectangle(shape, mCenterX, mCenterY, mRectangleColor)
                 is Triangle -> UITriangle(shape, mCenterX, mCenterY, mTriangleColor)
                 is Oval -> UIOval(shape, mCenterX, mCenterY, mOvalColor)
-                is Picture -> UIPicture(context, shape, mCenterX, mCenterY, mPictureColor)
+                is Picture -> UIPicture(shape, mCenterX, mCenterY, mPictureColor)
                 else -> TODO()
             }
         }

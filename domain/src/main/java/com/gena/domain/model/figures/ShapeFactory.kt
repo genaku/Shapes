@@ -13,7 +13,7 @@ class ShapeFactory {
             ShapeType.RECTANGLE -> Rectangle()
             ShapeType.OVAL -> Oval()
             ShapeType.TRIANGLE -> Triangle()
-            ShapeType.PICTURE -> Picture()
+            ShapeType.PICTURE -> TODO()
         }
 
         fun getShape(shapeData: ShapeData): Shape = when (shapeData.type) {

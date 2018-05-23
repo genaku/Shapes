@@ -11,5 +11,9 @@
     <string name="delete">Delete</string>
     <string name="rationale_ask_again">Open Settings, then tap Permissions and turn on Storage.</string>
     <string name="title_settings_dialog" translatable="false"></string>
+    <string name="cant_undo">Cant undo</string>
+    <string name="cant_redo">Cant redo</string>
+    <string name="cant_exec">Cant execute command</string>
+    <string name="cant_history">Cant save to history</string>
 
 </resources>

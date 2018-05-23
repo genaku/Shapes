@@ -1,13 +1,10 @@
 package com.gena.shapes.model
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Paint
 import android.graphics.Path
 import com.gena.domain.model.figures.*
-import java.io.IOException
-import java.io.InputStream
 
 
 /**
@@ -63,7 +60,6 @@ class UITriangle(
 }
 
 class UIPicture(
-        private val context: Context,
         private val picture: Picture,
         centerX: Float,
         centerY: Float,
@@ -76,29 +72,15 @@ class UIPicture(
         get() = mBitmap
 
     private fun tryToCreateBmp(): Bitmap? {
-//        val bmp = BitmapFactory.decodeFile(picture.filename) ?: return null
-        val bmp = getBitmapFromAsset(context, "vinni.jpg")
-        return try {
-            Bitmap.createScaledBitmap(bmp, picture.width, picture.height, true)
+        if (picture.filename.isBlank())
+            return null
+        try {
+            val bmp = BitmapFactory.decodeFile(picture.filename) ?: return null
+            return Bitmap.createScaledBitmap(bmp, picture.width, picture.height, true)
         } catch (e: Exception) {
             e.printStackTrace()
-            null
+            return null
         }
-    }
-
-    private fun getBitmapFromAsset(context: Context, filePath: String): Bitmap? {
-        val assetManager = context.assets
-
-        val inputStream: InputStream
-        var bitmap: Bitmap? = null
-        try {
-            inputStream = assetManager.open(filePath)
-            bitmap = BitmapFactory.decodeStream(inputStream)
-        } catch (e: IOException) {
-            // handle exception
-        }
-
-        return bitmap
     }
 
 }
