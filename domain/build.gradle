@@ -4,8 +4,8 @@ apply plugin: 'kotlin-android'
 android {
     def globalConfiguration = rootProject.extensions.getByName("ext")
 
-    compileSdkVersion globalConfiguration["androidCompileSdkVersion"]
-    buildToolsVersion globalConfiguration["androidBuildToolsVersion"]
+    compileSdkVersion 27
+    buildToolsVersion '28.0.0 rc1'
 
     defaultConfig {
         minSdkVersion globalConfiguration["androidMinSdkVersion"]
@@ -24,6 +24,5 @@ dependencies {
     implementation commonDependencies.kotlin
     implementation commonDependencies.plog
     implementation commonDependencies.androidSupport4
-
     testImplementation commonTestDependencies.uspek
 }

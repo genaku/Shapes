@@ -30,6 +30,12 @@ class Interactor(private val useCase: IUseCase) : IInteractor {
         }
     }
 
+    override fun addPicture(x0: Int, y0: Int, filename: String) {
+        mCommandActor.offer {
+            useCase.addPicture(x0, y0, filename)
+        }
+    }
+
     override fun deleteSelected() {
         mCommandActor.offer {
             useCase.deleteSelected()

@@ -4,6 +4,7 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.support.v4.util.ArrayMap
+import com.gena.domain.consts.ShapeError
 import com.gena.domain.model.MenuCommand
 import com.gena.domain.model.ShapesModel
 import com.gena.domain.usecases.UseCase
@@ -21,6 +22,7 @@ class ShapesViewModel(app: Application, repository: IRepository) : IShapesViewMo
     // OBSERVABLES
     val actionsAvailability = MutableLiveData<ArrayMap<MenuCommand, Boolean>>()
     val shapesToRefresh = MutableLiveData<ShapesModel>()
+    val errorEvent = SingleLiveEvent<ShapeError>()
     // OBSERVABLES
 
     val interactor: Interactor
@@ -36,5 +38,8 @@ class ShapesViewModel(app: Application, repository: IRepository) : IShapesViewMo
 
     override fun refreshShapes(shapes: ShapesModel) =
             shapesToRefresh.postValue(shapes)
+
+    override fun showError(error: ShapeError) =
+            errorEvent.postValue(error)
 
 }

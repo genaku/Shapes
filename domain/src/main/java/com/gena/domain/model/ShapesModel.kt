@@ -2,6 +2,8 @@ package com.gena.domain.model
 
 import com.gena.domain.consts.ShapeMoveMode
 import com.gena.domain.consts.ShapeType
+import com.gena.domain.model.figures.Picture
+import com.gena.domain.model.figures.PictureData
 import com.gena.domain.model.figures.Shape
 import com.gena.domain.model.figures.ShapeFactory
 import java.util.*
@@ -24,6 +26,20 @@ class ShapesModel(
     @Throws(ShapeException::class)
     fun add(type: ShapeType, x: Int, y: Int): Int {
         val shape = ShapeFactory.getShape(type)
+        shape.moveShape(
+                newX = x - shape.width / 2,
+                newY = y - shape.height / 2,
+                mode = ShapeMoveMode.BODY
+        )
+        shapes.add(shape)
+        selectedIdx = shapes.indexOf(shape)
+        notifyChanged()
+        return selectedIdx
+    }
+
+    @Throws(ShapeException::class)
+    fun addPicture(x: Int, y: Int, pictureData: PictureData): Int {
+        val shape = Picture(pictureData)
         shape.moveShape(
                 newX = x - shape.width / 2,
                 newY = y - shape.height / 2,

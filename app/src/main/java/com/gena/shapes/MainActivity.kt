@@ -1,9 +1,14 @@
 package com.gena.shapes
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.gena.domain.consts.ShapeError
 import com.gena.domain.consts.ShapeType
 import com.gena.domain.model.MenuCommand
 import com.gena.domain.model.ShapesModel
@@ -11,6 +16,12 @@ import com.gena.domain.usecases.interfaces.IInteractor
 import com.gena.shapes.extensions.getViewModel
 import com.gena.shapes.extensions.setObserver
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.toast
+import pl.aprilapps.easyphotopicker.DefaultCallback
+import pl.aprilapps.easyphotopicker.EasyImage
+import pl.tajchert.nammu.Nammu
+import pl.tajchert.nammu.PermissionCallback
+import java.io.File
 
 /**
  * Created by Gena Kuchergin on 03.02.2018.
@@ -26,13 +37,28 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Nammu.init(applicationContext)
         setupView()
+
+        val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            Nammu.askForPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, object : PermissionCallback {
+                override fun permissionGranted() {
+                    //Nothing, this sample saves to Public gallery so it needs permission
+                }
+
+                override fun permissionRefused() {
+//                    finish()
+                }
+            })
+        }
     }
 
     private fun setupView() {
         mViewModel = getViewModel { ShapesViewModel(application, ShapesApplication.repository) }.apply {
             actionsAvailability.setObserver(this@MainActivity, { value -> value?.apply { invalidateOptionsMenu() } })
             shapesToRefresh.setObserver(this@MainActivity, { value -> redrawShapes(value) })
+            errorEvent.setObserver(this@MainActivity, { value -> showErrorToast(value) })
         }
         mInteractor = mViewModel.interactor
         viewPanel.setInteractor(mInteractor)
@@ -75,6 +101,7 @@ class MainActivity : AppCompatActivity() {
         MenuCommand.ADD_TRIANGLE -> R.id.action_triangle
         MenuCommand.ADD_RECTANGLE -> R.id.action_rectangle
         MenuCommand.ADD_OVAL -> R.id.action_oval
+        MenuCommand.ADD_PICTURE -> R.id.action_picture
         MenuCommand.REDO -> R.id.action_redo
         MenuCommand.UNDO -> R.id.action_undo
         MenuCommand.DELETE -> R.id.action_delete
@@ -92,6 +119,7 @@ class MainActivity : AppCompatActivity() {
         R.id.action_triangle -> execMenuCommand { addShape(ShapeType.TRIANGLE) }
         R.id.action_rectangle -> execMenuCommand { addShape(ShapeType.RECTANGLE) }
         R.id.action_oval -> execMenuCommand { addShape(ShapeType.OVAL) }
+        R.id.action_picture -> execMenuCommand { getPicture() }
         R.id.action_undo -> execMenuCommand { mInteractor.undo() }
         R.id.action_redo -> execMenuCommand { mInteractor.redo() }
         R.id.action_delete -> execMenuCommand { mInteractor.deleteSelected() }
@@ -105,5 +133,57 @@ class MainActivity : AppCompatActivity() {
 
     private fun addShape(type: ShapeType) =
             mInteractor.addShape(type, mCenterX, mCenterY)
+
+    private fun getPicture() {
+        EasyImage.openGallery(this, 0)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        Nammu.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        EasyImage.handleActivityResult(requestCode, resultCode, data, this, object : DefaultCallback() {
+            override fun onImagePicked(imageFile: File?, source: EasyImage.ImageSource?, type: Int) {
+                onPhotosReturned(imageFile)
+            }
+
+            override fun onImagePickerError(e: Exception?, source: EasyImage.ImageSource?, type: Int) {
+                //Some error handling
+                e!!.printStackTrace()
+            }
+
+            override fun onCanceled(source: EasyImage.ImageSource?, type: Int) {
+                //Cancel handling, you might wanna remove taken photo if it was canceled
+                if (source == EasyImage.ImageSource.CAMERA) {
+                    val photoFile = EasyImage.lastlyTakenButCanceledPhoto(this@MainActivity)
+                    photoFile?.delete()
+                }
+            }
+        })
+    }
+
+    private fun onPhotosReturned(returnedPhoto: File?) {
+        returnedPhoto ?: return
+        mInteractor.addPicture(mCenterX, mCenterY, returnedPhoto.absolutePath)
+    }
+
+    private fun showErrorToast(error: ShapeError?) {
+        error ?: return
+        toast(when (error) {
+            ShapeError.CANT_UNDO -> getString(R.string.cant_undo)
+            ShapeError.CANT_REDO -> getString(R.string.cant_redo)
+            ShapeError.CANT_EXEC_COMMAND -> getString(R.string.cant_exec)
+            ShapeError.CANT_SAVE_TO_HISTORY -> getString(R.string.cant_history)
+        })
+    }
+
+    override fun onDestroy() {
+        // Clear any configuration that was done!
+        EasyImage.clearConfiguration(this)
+        super.onDestroy()
+    }
 
 }

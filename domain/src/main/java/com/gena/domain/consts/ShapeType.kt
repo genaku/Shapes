@@ -7,5 +7,6 @@ package com.gena.domain.consts
 enum class ShapeType {
     RECTANGLE,
     OVAL,
-    TRIANGLE
+    TRIANGLE,
+    PICTURE
 }

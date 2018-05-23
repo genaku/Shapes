@@ -10,6 +10,7 @@ interface IUseCase {
     fun startObserving()
     fun stopObserving()
     fun addShape(type: ShapeType, x0: Int, y0: Int)
+    fun addPicture(x0: Int, y0: Int, filename: String)
     fun deleteSelected()
     fun undo()
     fun redo()

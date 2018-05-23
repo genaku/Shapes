@@ -9,13 +9,11 @@ import android.view.MotionEvent
 import android.view.View
 import com.gena.domain.model.ShapesModel
 import com.gena.domain.model.figures.Oval
+import com.gena.domain.model.figures.Picture
 import com.gena.domain.model.figures.Rectangle
 import com.gena.domain.model.figures.Triangle
 import com.gena.domain.usecases.interfaces.IInteractor
-import com.gena.shapes.model.UIOval
-import com.gena.shapes.model.UIRectangle
-import com.gena.shapes.model.UIShape
-import com.gena.shapes.model.UITriangle
+import com.gena.shapes.model.*
 import com.gena.shapes.view.DrawSelector
 import com.gena.shapes.view.draw
 import java.lang.ref.WeakReference
@@ -35,6 +33,7 @@ class ViewPanel : View {
     private val mRectangleColor = resources.getColor(R.color.defRectangleColor)
     private val mTriangleColor = resources.getColor(R.color.defTriangleColor)
     private val mOvalColor = resources.getColor(R.color.defOvalColor)
+    private val mPictureColor = resources.getColor(R.color.defPictureColor)
     private val mSelectorColor = resources.getColor(R.color.defSelectColor)
 
     private var mInteractor: IInteractor? = null
@@ -71,6 +70,7 @@ class ViewPanel : View {
                 is Rectangle -> UIRectangle(shape, mCenterX, mCenterY, mRectangleColor)
                 is Triangle -> UITriangle(shape, mCenterX, mCenterY, mTriangleColor)
                 is Oval -> UIOval(shape, mCenterX, mCenterY, mOvalColor)
+                is Picture -> UIPicture(shape, mCenterX, mCenterY, mPictureColor)
                 else -> TODO()
             }
         }

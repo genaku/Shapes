@@ -1,11 +1,11 @@
 package com.gena.shapes.model
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Paint
 import android.graphics.Path
-import com.gena.domain.model.figures.Oval
-import com.gena.domain.model.figures.Rectangle
-import com.gena.domain.model.figures.Shape
-import com.gena.domain.model.figures.Triangle
+import com.gena.domain.model.figures.*
+
 
 /**
  * Created by Gena Kuchergin on 02.05.2018.
@@ -17,7 +17,6 @@ sealed class UIShape(
         centerY: Float,
         color: Int
 ) {
-
     val left = centerX + shape.left
     val top = centerY + shape.top
     val right = centerX + shape.right
@@ -29,7 +28,6 @@ sealed class UIShape(
         style = Paint.Style.FILL_AND_STROKE
         isAntiAlias = true
     }
-
 }
 
 class UIRectangle(
@@ -52,7 +50,6 @@ class UITriangle(
         centerY: Float,
         color: Int
 ) : UIShape(triangle, centerX, centerY, color) {
-
     val path = Path().apply {
         fillType = Path.FillType.EVEN_ODD
         moveTo(centerX + triangle.getPointX(0), centerY + triangle.getPointY(0))
@@ -60,5 +57,31 @@ class UITriangle(
         lineTo(centerX + triangle.getPointX(2), centerY + triangle.getPointY(2))
         close()
     }
+}
+
+class UIPicture(
+        private val picture: Picture,
+        centerX: Float,
+        centerY: Float,
+        color: Int
+) : UIShape(picture, centerX, centerY, color) {
+
+    private var mBitmap = tryToCreateBmp()
+
+    val bitmap
+        get() = mBitmap
+
+    private fun tryToCreateBmp(): Bitmap? {
+        if (picture.filename.isBlank())
+            return null
+        try {
+            val bmp = BitmapFactory.decodeFile(picture.filename) ?: return null
+            return Bitmap.createScaledBitmap(bmp, picture.width, picture.height, true)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+    }
 
 }
+
