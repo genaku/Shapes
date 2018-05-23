@@ -3,7 +3,6 @@ package com.gena.domain.model.selector
 import com.gena.domain.consts.ShapeMoveMode
 import com.gena.domain.extensions.EnumExt.enumFromInt
 import com.gena.domain.model.Constants
-import com.gena.domain.model.ShapeException
 import com.gena.domain.model.ShapesModel
 import com.gena.domain.model.figures.Shape
 
@@ -15,7 +14,6 @@ class Selector {
 
     data class SelectedItemData(val idx: Int, val mode: ShapeMoveMode)
 
-    @Throws(ShapeException::class)
     fun findSelected(model: ShapesModel, x: Int, y: Int): SelectedItemData {
         val selectedIdx = model.selectedIdx
         for (idx in model.size - 1 downTo 0) {
@@ -32,7 +30,6 @@ class Selector {
         return SelectedItemData(-1, ShapeMoveMode.NOTHING)
     }
 
-    @Throws(ShapeException::class)
     private fun checkItemForSelectionToMove(item: Shape, x: Int, y: Int, selected: Boolean): ShapeMoveMode =
             when {
                 selected -> getShapeMoveModeForSelectedItem(item, x, y)
