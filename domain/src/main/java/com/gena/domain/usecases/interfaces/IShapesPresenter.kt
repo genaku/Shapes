@@ -1,11 +1,11 @@
-package com.gena.presenters.interfaces
+package com.gena.domain.usecases.interfaces
 
 import com.gena.domain.model.ShapesModel
 
 /**
- * Created by Gena Kuchergin on 09.02.2018.
+ * Created by Gena Kuchergin on 29.04.2018.
  * © 2018 Gena Kuchergin. All Rights Reserved.
  */
-interface IShapesViewModel {
+interface IShapesPresenter {
     fun refreshShapes(shapes: ShapesModel)
 }

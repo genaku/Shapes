@@ -2,7 +2,6 @@ package com.genaku.repository.extensions
 
 import android.content.Context
 import java.util.*
-import kotlin.properties.ObservableProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -10,27 +9,7 @@ import kotlin.reflect.KProperty
  * Created by Gena Kuchergin on 25.09.2017
  */
 object DelegatesExt {
-    fun <T> notNullSingleValue(): ReadWriteProperty<Any?, T> = NotNullSingleValueVar()
     fun <T> preference(context: Context, name: String, default: T) = Preference(context, name, default)
-    inline fun <T> changeObservable(initialValue: T, crossinline onChange: (property: KProperty<*>, newValue: T) -> Unit):
-            ReadWriteProperty<Any?, T> = object : ObservableProperty<T>(initialValue) {
-        override fun beforeChange(property: KProperty<*>, oldValue: T, newValue: T): Boolean = (oldValue != newValue)
-        override fun afterChange(property: KProperty<*>, oldValue: T, newValue: T): Unit = onChange(property, newValue)
-    }
-}
-
-private class NotNullSingleValueVar<T> : ReadWriteProperty<Any?, T> {
-
-    private var value: T? = null
-
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return value ?: throw IllegalStateException("${property.name} not initialized")
-    }
-
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        this.value = if (this.value == null) value
-        else throw IllegalStateException("${property.name} already initialized")
-    }
 }
 
 class Preference<T>(

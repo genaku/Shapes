@@ -3,7 +3,10 @@ package com.gena.domain.model.selector
 import com.gena.domain.consts.ShapeMoveMode
 import com.gena.domain.extensions.EnumExt.enumFromInt
 import com.gena.domain.model.Constants
+import com.gena.domain.model.Constants.Companion.NO_SELECTED
+import com.gena.domain.model.KeyData
 import com.gena.domain.model.ShapesModel
+import com.gena.domain.model.figures.Point
 import com.gena.domain.model.figures.Shape
 
 /**
@@ -12,32 +15,31 @@ import com.gena.domain.model.figures.Shape
  */
 class Selector {
 
-    data class SelectedItemData(val idx: Int, val mode: ShapeMoveMode)
+    data class SelectedItemData(val key: KeyData, val mode: ShapeMoveMode)
 
-    fun findSelected(model: ShapesModel, x: Int, y: Int): SelectedItemData {
-        val selectedIdx = model.selectedIdx
+    fun findSelected(model: ShapesModel, point: Point): SelectedItemData {
+        val selectedIdx = model.selectedKey.idx
         for (idx in model.size - 1 downTo 0) {
             val shapeMoveMode = checkItemForSelectionToMove(
-                    item = model.getItem(idx),
-                    x = x,
-                    y = y,
+                    item = model.getItem(KeyData(idx)),
+                    point = point,
                     selected = (idx == selectedIdx)
             )
             if (shapeMoveMode != ShapeMoveMode.NOTHING) {
-                return SelectedItemData(idx, shapeMoveMode)
+                return SelectedItemData(KeyData(idx), shapeMoveMode)
             }
         }
-        return SelectedItemData(-1, ShapeMoveMode.NOTHING)
+        return SelectedItemData(NO_SELECTED, ShapeMoveMode.NOTHING)
     }
 
-    private fun checkItemForSelectionToMove(item: Shape, x: Int, y: Int, selected: Boolean): ShapeMoveMode =
+    private fun checkItemForSelectionToMove(item: Shape, point: Point, selected: Boolean): ShapeMoveMode =
             when {
-                selected -> getShapeMoveModeForSelectedItem(item, x, y)
-                item.contains(x, y) -> ShapeMoveMode.BODY
+                selected -> getShapeMoveModeForSelectedItem(item, point)
+                item.contains(point) -> ShapeMoveMode.BODY
                 else -> ShapeMoveMode.NOTHING
             }
 
-    private fun getShapeMoveModeForSelectedItem(item: Shape, x: Int, y: Int): ShapeMoveMode {
+    private fun getShapeMoveModeForSelectedItem(item: Shape, point: Point): ShapeMoveMode {
         // outer borders of selection field
         val left = item.left - Constants.BORDER_WIDTH
         val top = item.top - Constants.BORDER_WIDTH
@@ -45,22 +47,22 @@ class Selector {
         val bottom = item.bottom + Constants.BORDER_WIDTH
 
         // out of selected item
-        if (x !in left..right || y !in top..bottom) {
+        if (point.x !in left..right || point.y !in top..bottom) {
             return ShapeMoveMode.NOTHING
         }
 
         // check finger position
         var result = ShapeMoveMode.BODY.value
-        if (x < item.left + Constants.BORDER_WIDTH) {
+        if (point.x < item.left + Constants.BORDER_WIDTH) {
             result += ShapeMoveMode.LEFT_SIDE.value   // left side selected
         }
-        if (x > right - 2 * Constants.BORDER_WIDTH) {
+        if (point.x > right - 2 * Constants.BORDER_WIDTH) {
             result += ShapeMoveMode.RIGHT_SIDE.value  // right side selected
         }
-        if (y < item.top + Constants.BORDER_WIDTH) {
+        if (point.y < item.top + Constants.BORDER_WIDTH) {
             result += ShapeMoveMode.TOP_SIDE.value    // top side selected
         }
-        if (y > bottom - 2 * Constants.BORDER_WIDTH) {
+        if (point.y > bottom - 2 * Constants.BORDER_WIDTH) {
             result += ShapeMoveMode.BOTTOM_SIDE.value // bottom side selected
         }
         return enumFromInt(result) ?: ShapeMoveMode.NOTHING

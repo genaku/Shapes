@@ -1,6 +1,7 @@
 package com.gena.domain.model.figures
 
 import com.gena.domain.consts.ShapeType
+import com.gena.domain.model.Constants
 import java.io.Serializable
 
 /**
@@ -9,8 +10,8 @@ import java.io.Serializable
  */
 data class ShapeData(
         val type: ShapeType,
-        val xValues: ArrayList<Int>,
-        val yValues: ArrayList<Int>,
+        val topLeft: Point = Point(0, 0),
+        val bottomRight: Point = Point(Constants.DEFAULT_SIZE, Constants.DEFAULT_SIZE),
         val filename: String = ""
 ) : Serializable {
     companion object {

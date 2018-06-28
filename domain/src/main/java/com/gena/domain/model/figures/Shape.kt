@@ -1,6 +1,8 @@
 package com.gena.domain.model.figures
 
 import com.gena.domain.consts.ShapeMoveMode
+import com.gena.domain.consts.ShapeType
+import com.gena.domain.extensions.shiftBy
 import com.gena.domain.model.Constants
 import java.io.Serializable
 
@@ -8,21 +10,19 @@ import java.io.Serializable
  * Created by Gena Kuchergin on 03.02.2018.
  * © 2018 Gena Kuchergin. All Rights Reserved.
  */
-abstract class Shape(val data: ShapeData) : Serializable {
-
-    abstract val numberOfPoints: Int
+sealed class Shape(val data: ShapeData) : Serializable {
 
     val top
-        get() = data.yValues.min() ?: 0
+        get() = data.topLeft.y
 
     val bottom
-        get() = data.yValues.max() ?: 0
+        get() = data.bottomRight.y
 
     val left
-        get() = data.xValues.min() ?: 0
+        get() = data.topLeft.x
 
     val right
-        get() = data.xValues.max() ?: 0
+        get() = data.bottomRight.x
 
     val width
         get() = right - left
@@ -30,90 +30,147 @@ abstract class Shape(val data: ShapeData) : Serializable {
     val height
         get() = bottom - top
 
-    fun getPointX(idx: Int): Int {
-        return data.xValues[idx]
-    }
-
-    fun getPointY(idx: Int): Int {
-        return data.yValues[idx]
-    }
-
-    protected fun moveX(x: Int): Boolean =
-            move(x - left, data.xValues)
-
-    protected fun moveY(y: Int): Boolean =
-            move(y - top, data.yValues)
-
-    private fun move(delta: Int, values: ArrayList<Int>): Boolean {
-        if (delta == 0) {
-            return false
-        }
-        for (i in 0 until numberOfPoints) {
-            values[i] += delta
-        }
-        return true
-    }
-
-    protected fun shiftLeftSide(x: Int) =
-            shiftSide(newPos = x, movingPos = left, fixedPos = right, values = data.xValues)
-
-    protected fun shiftRightSide(x: Int) =
-            shiftSide(newPos = x, movingPos = right, fixedPos = left, values = data.xValues)
-
-    protected fun shiftTopSide(y: Int) =
-            shiftSide(newPos = y, movingPos = top, fixedPos = bottom, values = data.yValues)
-
-    protected fun shiftBottomSide(y: Int): Boolean =
-            shiftSide(newPos = y, movingPos = bottom, fixedPos = top, values = data.yValues)
-
-    private fun shiftSide(newPos: Int, movingPos: Int, fixedPos: Int, values: ArrayList<Int>): Boolean {
-        val sign = if (movingPos > fixedPos) -1 else 1
-        val newWidth = sign * (fixedPos - newPos)
-
-        if (newWidth <= Constants.MIN_SIZE) {
-            return false
-        }
-
-        val delta = sign * (newPos - movingPos)
-        val oldLength = Math.abs(fixedPos - movingPos)
-        val k = delta.toFloat() / oldLength
-        for (i in 0 until numberOfPoints) {
-            values[i] = values[i] + Math.round(k * (fixedPos - values[i]))
-        }
-        return true
-    }
-
-    fun moveShape(newX: Int, newY: Int, mode: ShapeMoveMode): Boolean = when (mode) {
+    fun moveShape(newPoint: Point, mode: ShapeMoveMode): Boolean = when (mode) {
         ShapeMoveMode.BODY ->
-            dualMove({ moveX(newX) }, { moveY(newY) })
-        ShapeMoveMode.LEFT_UPPER_CORNER ->
-            dualMove({ shiftLeftSide(newX) }, { shiftTopSide(newY) })
-        ShapeMoveMode.LEFT_BOTTOM_CORNER ->
-            dualMove({ shiftLeftSide(newX) }, { shiftBottomSide(newY) })
-        ShapeMoveMode.RIGHT_UPPER_CORNER ->
-            dualMove({ shiftRightSide(newX) }, { shiftTopSide(newY) })
-        ShapeMoveMode.RIGHT_BOTTOM_CORNER ->
-            dualMove({ shiftRightSide(newX) }, { shiftBottomSide(newY) })
+            if (newPoint != data.topLeft) {
+                val dx = newPoint.x - left
+                val dy = newPoint.y - top
+                data.topLeft.shiftBy(dx, dy)
+                data.bottomRight.shiftBy(dx, dy)
+                true
+            } else {
+                false
+            }
         ShapeMoveMode.LEFT_SIDE ->
-            shiftLeftSide(newX)
+            if (newPoint.x == left || leftSideLess(newPoint)) {
+                false
+            } else {
+                data.topLeft.x = newPoint.x
+                true
+            }
         ShapeMoveMode.RIGHT_SIDE ->
-            shiftRightSide(newX)
+            if (newPoint.x == right || rightSideLess(newPoint)) {
+                false
+            } else {
+                data.bottomRight.x = newPoint.x
+                true
+            }
         ShapeMoveMode.TOP_SIDE ->
-            shiftTopSide(newY)
+            if (newPoint.y == top || topSideLess(newPoint)) {
+                false
+            } else {
+                data.topLeft.y = newPoint.y
+                true
+            }
         ShapeMoveMode.BOTTOM_SIDE ->
-            shiftBottomSide(newY)
+            if (newPoint.y == bottom || bottomSideLess(newPoint)) {
+                false
+            } else {
+                data.bottomRight.y = newPoint.y
+                true
+            }
+        ShapeMoveMode.LEFT_UPPER_CORNER ->
+            if (newPoint == data.topLeft || leftSideLess(newPoint) || topSideLess(newPoint)) {
+                false
+            } else {
+                data.topLeft.x = newPoint.x
+                data.topLeft.y = newPoint.y
+                true
+            }
+        ShapeMoveMode.LEFT_BOTTOM_CORNER ->
+            if ((newPoint.x == left && newPoint.y == bottom) || leftSideLess(newPoint) || bottomSideLess(newPoint)) {
+                false
+            } else {
+                data.topLeft.x = newPoint.x
+                data.bottomRight.y = newPoint.y
+                true
+            }
+        ShapeMoveMode.RIGHT_UPPER_CORNER ->
+            if ((newPoint.x == right && newPoint.y == top) || rightSideLess(newPoint) || topSideLess(newPoint)) {
+                false
+            } else {
+                data.bottomRight.x = newPoint.x
+                data.topLeft.y = newPoint.y
+                true
+            }
+        ShapeMoveMode.RIGHT_BOTTOM_CORNER ->
+            if (newPoint == data.bottomRight || rightSideLess(newPoint) || bottomSideLess(newPoint)) {
+                false
+            } else {
+                data.bottomRight.x = newPoint.x
+                data.bottomRight.y = newPoint.y
+                true
+            }
         ShapeMoveMode.NOTHING ->
             false
     }
 
-    private fun dualMove(byX: () -> Boolean, byY: () -> Boolean): Boolean {
-        val result1 = byX()
-        val result2 = byY()
-        return result1 || result2
-    }
+    private fun bottomSideLess(newPoint: Point) =
+            (newPoint.y - top) < Constants.MIN_SIZE
+
+    private fun topSideLess(newPoint: Point) =
+            (bottom - newPoint.y) < Constants.MIN_SIZE
+
+    private fun rightSideLess(newPoint: Point) =
+            (newPoint.x - left) < Constants.MIN_SIZE
+
+    private fun leftSideLess(newPoint: Point) =
+            (right - newPoint.x) < Constants.MIN_SIZE
 
     companion object {
         private const val serialVersionUID = -8858760502335181962L
     }
+}
 
+class Rectangle(data: ShapeData = ShapeData(
+        type = ShapeType.RECTANGLE
+)) : Shape(data) {
+    companion object {
+        private const val serialVersionUID = -7689944340411885614L
+    }
+}
+
+class Oval(data: ShapeData = ShapeData(
+        type = ShapeType.OVAL
+)) : Shape(data) {
+    companion object {
+        private const val serialVersionUID = -6753643919006825079L
+    }
+}
+
+class Triangle(data: ShapeData = ShapeData(
+        type = ShapeType.TRIANGLE
+)) : Shape(data) {
+
+    val bottomLeftVertex
+        get() = Point(left, bottom)
+
+    val bottomRightVertex
+        get() = data.bottomRight
+
+    val topVertex
+        get() = Point(left + width / 2, top)
+
+    companion object {
+        private const val serialVersionUID = 7647815328629665556L
+    }
+}
+
+class Picture : Shape {
+
+    constructor(data: ShapeData) : super(data)
+
+    constructor(pictureData: PictureData) :
+            super(ShapeData(
+                    type = ShapeType.PICTURE,
+                    bottomRight = Point(pictureData.width, pictureData.height),
+                    filename = pictureData.filename)
+            )
+
+    val filename
+        get() = data.filename
+
+    companion object {
+        private const val serialVersionUID = -7893724938095347677L
+    }
 }

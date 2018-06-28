@@ -1,6 +1,7 @@
 package com.genaku.repository
 
 import android.content.Context
+import com.gena.domain.model.KeyData
 import com.gena.domain.model.ShapesModel
 import com.gena.domain.model.figures.Picture
 import com.gena.domain.model.figures.PictureData
@@ -32,7 +33,7 @@ class Repository(private val context: Context, private val defaultPictureSize: I
             e.printStackTrace()
             ArrayList<Shape>()
         }
-        val model = ShapesModel(dataList ?: ArrayList(), selectedIdx)
+        val model = ShapesModel(dataList ?: ArrayList(), KeyData(selectedIdx))
         PLog.d("load model ${model.size}")
         deleteObsoleteFiles(model)
         mHistory = CommandHistory(model)
@@ -54,7 +55,7 @@ class Repository(private val context: Context, private val defaultPictureSize: I
 
     override fun saveModel(model: ShapesModel) = with(mSettings) {
         shapes = serializeToString(model.items)
-        selectedIdx = model.selectedIdx
+        selectedIdx = model.selectedKey.idx
     }
 
     private fun serializeToString(value: Serializable): String = try {

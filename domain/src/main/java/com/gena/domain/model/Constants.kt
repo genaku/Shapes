@@ -9,5 +9,6 @@ class Constants {
         const val DEFAULT_SIZE = 100
         const val MIN_SIZE = 60
         const val BORDER_WIDTH = 25
+        val NO_SELECTED = KeyData(-1)
     }
 }

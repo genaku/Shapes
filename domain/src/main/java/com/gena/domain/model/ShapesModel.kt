@@ -2,10 +2,8 @@ package com.gena.domain.model
 
 import com.gena.domain.consts.ShapeMoveMode
 import com.gena.domain.consts.ShapeType
-import com.gena.domain.model.figures.Picture
-import com.gena.domain.model.figures.PictureData
-import com.gena.domain.model.figures.Shape
-import com.gena.domain.model.figures.ShapeFactory
+import com.gena.domain.model.Constants.Companion.NO_SELECTED
+import com.gena.domain.model.figures.*
 import java.util.*
 
 /**
@@ -14,7 +12,7 @@ import java.util.*
  */
 class ShapesModel(
         private val shapes: ArrayList<Shape> = ArrayList(),
-        var selectedIdx: Int = -1
+        var selectedKey: KeyData = NO_SELECTED
 ) : ObservableModel() {
 
     val size: Int
@@ -24,80 +22,76 @@ class ShapesModel(
         get() = shapes
 
     @Throws(ShapeException::class)
-    fun add(type: ShapeType, x: Int, y: Int): Int {
-        val shape = ShapeFactory.getShape(type)
+    fun add(type: ShapeType): KeyData =
+            addShapeToModel(ShapeFactory.createShape(type))
+
+    @Throws(ShapeException::class)
+    fun addPicture(pictureData: PictureData): KeyData =
+            addShapeToModel(Picture(pictureData))
+
+    @Throws(ShapeException::class)
+    private fun addShapeToModel(shape: Shape): KeyData {
         shape.moveShape(
-                newX = x - shape.width / 2,
-                newY = y - shape.height / 2,
+                newPoint = Point(-shape.width / 2, -shape.height / 2),
                 mode = ShapeMoveMode.BODY
         )
         shapes.add(shape)
-        selectedIdx = shapes.indexOf(shape)
+        selectedKey = KeyData(shapes.indexOf(shape))
         notifyChanged()
-        return selectedIdx
+        return selectedKey
     }
 
     @Throws(ShapeException::class)
-    fun addPicture(x: Int, y: Int, pictureData: PictureData): Int {
-        val shape = Picture(pictureData)
-        shape.moveShape(
-                newX = x - shape.width / 2,
-                newY = y - shape.height / 2,
-                mode = ShapeMoveMode.BODY
-        )
-        shapes.add(shape)
-        selectedIdx = shapes.indexOf(shape)
-        notifyChanged()
-        return selectedIdx
+    fun getItem(key: KeyData): Shape {
+        checkKey(key)
+        return shapes[key.idx]
     }
 
     @Throws(ShapeException::class)
-    fun getItem(idx: Int): Shape {
-        checkIndex(idx)
-        return shapes[idx]
-    }
-
-    @Throws(ShapeException::class)
-    private fun checkIndex(idx: Int) {
-        if (idx < 0 || idx >= shapes.size)
+    private fun checkKey(key: KeyData) {
+        if (key.idx !in 0 until shapes.size) {
             throw ShapeException(ShapeExceptionError.INDEX_OUT_OF_MODEL_LIST)
-    }
-
-    @Throws(ShapeException::class)
-    fun insert(shape: Shape, index: Int) {
-        if (index == shapes.size) {
-            shapes.add(shape)
-            selectedIdx = shapes.indexOf(shape)
-        } else {
-            checkIndex(index)
-            shapes.add(index, shape)
         }
-        selectedIdx = index
+    }
+
+    @Throws(ShapeException::class)
+    fun insert(shape: Shape, key: KeyData) {
+        selectedKey = if (key.idx in 0 until shapes.size) {
+            shapes.add(key.idx, shape)
+            key
+        } else {
+            shapes.add(shape)
+            KeyData(shapes.indexOf(shape))
+        }
         notifyChanged()
     }
 
     @Throws(ShapeException::class)
-    fun delete(idx: Int) {
-        checkIndex(idx)
-        if (selectedIdx == idx)
-            selectedIdx = -1
-        shapes.removeAt(idx)
+    fun delete(key: KeyData) {
+        checkKey(key)
+        if (selectedKey == key)
+            selectedKey = NO_SELECTED
+        shapes.removeAt(key.idx)
         notifyChanged()
     }
 
     @Throws(ShapeException::class)
-    fun move(idx: Int, newX: Int, newY: Int, mode: ShapeMoveMode) {
-        checkIndex(idx)
-        if (shapes[idx].moveShape(newX, newY, mode))
+    fun move(key: KeyData, newX: Int, newY: Int, mode: ShapeMoveMode) {
+        if (getItem(key).moveShape(Point(newX, newY), mode))
             notifyChanged()
     }
 
     @Throws(ShapeException::class)
-    fun getSelectedItem(): Shape =
-            getItem(selectedIdx)
+    fun getSelectedItem(): Shape? {
+        return try {
+            getItem(selectedKey)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
-    fun setSelected(idx: Int) {
-        selectedIdx = idx
+    fun setSelected(key: KeyData) {
+        selectedKey = key
         notifyChanged()
     }
 

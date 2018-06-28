@@ -1,5 +1,7 @@
 package com.gena.domain.model.history
 
+import com.gena.domain.model.Constants.Companion.NO_SELECTED
+import com.gena.domain.model.KeyData
 import com.gena.domain.model.ShapeException
 import com.gena.domain.model.ShapesModel
 import com.gena.domain.model.figures.PictureData
@@ -9,21 +11,19 @@ import com.gena.domain.model.figures.PictureData
  * © 2018 Gena Kuchergin. All Rights Reserved.
  */
 class CommandCreatePicture(
-        private val x: Int,
-        private val y: Int,
         private val pictureData: PictureData
 ) : Command() {
 
-    private var mIndex: Int = 0
+    private var mKey: KeyData = NO_SELECTED
 
     @Throws(ShapeException::class)
     override fun doExecute(model: ShapesModel) {
-        mIndex = model.addPicture(x, y, pictureData)
+        mKey = model.addPicture(pictureData)
     }
 
     @Throws(ShapeException::class)
     override fun undoExecute(model: ShapesModel) {
-        model.delete(mIndex)
+        model.delete(mKey)
     }
 
 }

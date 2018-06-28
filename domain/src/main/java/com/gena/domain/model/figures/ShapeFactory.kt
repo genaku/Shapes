@@ -8,20 +8,18 @@ import com.gena.domain.consts.ShapeType
  */
 class ShapeFactory {
     companion object {
-
-        fun getShape(type: ShapeType): Shape = when (type) {
+        fun createShape(type: ShapeType): Shape = when (type) {
             ShapeType.RECTANGLE -> Rectangle()
             ShapeType.OVAL -> Oval()
             ShapeType.TRIANGLE -> Triangle()
             ShapeType.PICTURE -> TODO()
         }
 
-        fun getShape(shapeData: ShapeData): Shape = when (shapeData.type) {
+        fun createShape(shapeData: ShapeData): Shape = when (shapeData.type) {
             ShapeType.RECTANGLE -> Rectangle(shapeData)
             ShapeType.OVAL -> Oval(shapeData)
             ShapeType.TRIANGLE -> Triangle(shapeData)
             ShapeType.PICTURE -> Picture(shapeData)
         }
-
     }
 }

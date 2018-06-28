@@ -1,4 +1,4 @@
-package com.gena.shapes
+package com.gena.shapes.view
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -7,15 +7,12 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.gena.domain.model.Constants.Companion.NO_SELECTED
 import com.gena.domain.model.ShapesModel
-import com.gena.domain.model.figures.Oval
-import com.gena.domain.model.figures.Picture
-import com.gena.domain.model.figures.Rectangle
-import com.gena.domain.model.figures.Triangle
-import com.gena.domain.usecases.interfaces.IInteractor
+import com.gena.domain.model.figures.*
+import com.gena.domain.usecases.interfaces.ISelectionInteractor
+import com.gena.shapes.R
 import com.gena.shapes.model.*
-import com.gena.shapes.view.DrawSelector
-import com.gena.shapes.view.draw
 import java.lang.ref.WeakReference
 
 @Suppress("DEPRECATION")
@@ -36,7 +33,7 @@ class ViewPanel : View {
     private val mPictureColor = resources.getColor(R.color.defPictureColor)
     private val mSelectorColor = resources.getColor(R.color.defSelectColor)
 
-    private var mInteractor: IInteractor? = null
+    private var mSelectionInteractor: ISelectionInteractor? = null
 
     private var mModelWeakRef: WeakReference<ShapesModel> = WeakReference(ShapesModel())
     private var uiShapes: ArrayList<UIShape> = ArrayList()
@@ -71,13 +68,12 @@ class ViewPanel : View {
                 is Triangle -> UITriangle(shape, mCenterX, mCenterY, mTriangleColor)
                 is Oval -> UIOval(shape, mCenterX, mCenterY, mOvalColor)
                 is Picture -> UIPicture(shape, mCenterX, mCenterY, mPictureColor)
-                else -> TODO()
             }
         }
     }
 
-    fun setInteractor(interactor: IInteractor) {
-        mInteractor = interactor
+    fun setInteractor(selectionInteractor: ISelectionInteractor) {
+        mSelectionInteractor = selectionInteractor
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
@@ -94,7 +90,7 @@ class ViewPanel : View {
         // clear background
         canvas.drawPaint(mBackgroundPaint)
 
-        val selectedIdx = mModelWeakRef.get()?.selectedIdx ?: -1
+        val selectedIdx = mModelWeakRef.get()?.selectedKey?.idx ?: -1
 
         // show all shapes
         for (i in 0 until uiShapes.size) {
@@ -124,18 +120,18 @@ class ViewPanel : View {
             MotionEvent.ACTION_MOVE -> {
                 // Log.i("ViewPanel", "MOVE");
                 mMoved = true
-                mInteractor?.moveSelected(xToPX(currentX), yToPY(currentY))
+                mSelectionInteractor?.moveSelectedTo(Point(xToPX(currentX), yToPY(currentY)))
 
             }
             MotionEvent.ACTION_DOWN -> {
                 // Log.i("ViewPanel", "DOWN");
                 mMoved = false
-                mInteractor?.findSelection(xToPX(currentX), yToPY(currentY))
+                mSelectionInteractor?.findSelection(Point(xToPX(currentX), yToPY(currentY)))
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL ->
                 // Log.i("ViewPanel", "UP");
                 if (mMoved) {
-                    mInteractor?.movementFinished()
+                    mSelectionInteractor?.movementFinished()
                     mMoved = false
                 }
         }
@@ -143,13 +139,20 @@ class ViewPanel : View {
     }
 
     private fun xToPX(x: Float): Int {
-        val px = (x - mCenterX).toInt()
-        return px
+        return (x - mCenterX).toInt()
     }
 
     private fun yToPY(y: Float): Int {
         val py = (y - mCenterY).toInt()
         return py
+    }
+
+    fun deleteSelectedFromCache() {
+        val selectedKey = mModelWeakRef.get()?.selectedKey ?: return
+        if (selectedKey == NO_SELECTED) {
+            return
+        }
+        getItem(selectedKey.idx)?.onDelete()
     }
 
 }

@@ -1,6 +1,7 @@
 package com.gena.domain.model.history
 
 import com.gena.domain.consts.ShapeMoveMode
+import com.gena.domain.model.KeyData
 import com.gena.domain.model.ShapeException
 import com.gena.domain.model.ShapesModel
 
@@ -9,7 +10,7 @@ import com.gena.domain.model.ShapesModel
  * © 2018 Gena Kuchergin. All Rights Reserved.
  */
 class CommandMove(
-        private val index: Int,
+        private val key: KeyData,
         private val shapeMoveMode: ShapeMoveMode,
         private val oldX: Int,
         private val oldY: Int,
@@ -19,14 +20,14 @@ class CommandMove(
 
     @Throws(ShapeException::class)
     override fun doExecute(model: ShapesModel) {
-        model.move(index, newX, newY, shapeMoveMode)
-        model.setSelected(index)
+        model.move(key, newX, newY, shapeMoveMode)
+        model.setSelected(key)
     }
 
     @Throws(ShapeException::class)
     override fun undoExecute(model: ShapesModel) {
-        model.move(index, oldX, oldY, shapeMoveMode)
-        model.setSelected(index)
+        model.move(key, oldX, oldY, shapeMoveMode)
+        model.setSelected(key)
     }
 
 }

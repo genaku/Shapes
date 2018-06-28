@@ -1,6 +1,7 @@
 package com.gena.domain
 
-import com.gena.domain.model.figures.Oval
+import com.gena.domain.model.figures.Point
+import com.gena.domain.model.figures.Rectangle
 import com.gena.domain.model.selector.contains
 import org.junit.runner.RunWith
 import pl.mareklangiewicz.uspek.USpek
@@ -13,19 +14,18 @@ import pl.mareklangiewicz.uspek.eq
  * © 2018 Gena Kuchergin. All Rights Reserved.
  */
 @RunWith(USpekJUnitRunner::class)
-class OvalTest {
+class TestSelectRectangle {
     init {
-        USpek.uspek("test oval") {
+        USpek.uspek("test rectangle") {
 
-            val shape = Oval()
+            val shape = Rectangle()
 
             "test not selected" o {
-                shape.contains(-10, -10) eq false
-                shape.contains(10, 10) eq false
+                shape.contains(Point(-10, -10)) eq false
             }
 
             "test selected" o {
-                shape.contains(50, 50) eq true
+                shape.contains(Point(10, 10)) eq true
             }
         }
     }

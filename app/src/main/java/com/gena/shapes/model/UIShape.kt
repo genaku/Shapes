@@ -5,7 +5,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Paint
 import android.graphics.Path
 import com.gena.domain.model.figures.*
-
+import com.gena.shapes.view.ImageCache
 
 /**
  * Created by Gena Kuchergin on 02.05.2018.
@@ -28,6 +28,8 @@ sealed class UIShape(
         style = Paint.Style.FILL_AND_STROKE
         isAntiAlias = true
     }
+
+    open fun onDelete() {}
 }
 
 class UIRectangle(
@@ -52,9 +54,9 @@ class UITriangle(
 ) : UIShape(triangle, centerX, centerY, color) {
     val path = Path().apply {
         fillType = Path.FillType.EVEN_ODD
-        moveTo(centerX + triangle.getPointX(0), centerY + triangle.getPointY(0))
-        lineTo(centerX + triangle.getPointX(1), centerY + triangle.getPointY(1))
-        lineTo(centerX + triangle.getPointX(2), centerY + triangle.getPointY(2))
+        moveTo(centerX + triangle.bottomLeftVertex.x, centerY + triangle.bottomLeftVertex.y)
+        lineTo(centerX + triangle.topVertex.x, centerY + triangle.topVertex.y)
+        lineTo(centerX + triangle.bottomRightVertex.x, centerY + triangle.bottomRightVertex.y)
         close()
     }
 }
@@ -66,10 +68,25 @@ class UIPicture(
         color: Int
 ) : UIShape(picture, centerX, centerY, color) {
 
-    private var mBitmap = tryToCreateBmp()
+    private var mBitmap = loadBitmap()
 
     val bitmap
         get() = mBitmap
+
+    override fun onDelete() {
+        ImageCache.deleteFromCache(picture.filename)
+    }
+
+    private fun loadBitmap(): Bitmap? {
+        var bitmap = ImageCache.getFromCache(picture.filename, picture.width, picture.height)
+        if (bitmap == null) {
+            bitmap = tryToCreateBmp()
+            if (bitmap != null) {
+                ImageCache.addToCache(picture.filename, bitmap)
+            }
+        }
+        return bitmap
+    }
 
     private fun tryToCreateBmp(): Bitmap? {
         if (picture.filename.isBlank())

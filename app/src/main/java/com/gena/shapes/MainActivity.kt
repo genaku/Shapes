@@ -12,9 +12,12 @@ import com.gena.domain.consts.ShapeError
 import com.gena.domain.consts.ShapeType
 import com.gena.domain.model.MenuCommand
 import com.gena.domain.model.ShapesModel
-import com.gena.domain.usecases.interfaces.IInteractor
+import com.gena.domain.usecases.interfaces.IShapesHistoryInteractor
 import com.gena.shapes.extensions.getViewModel
 import com.gena.shapes.extensions.setObserver
+import com.gena.shapes.viewmodel.ErrorViewModel
+import com.gena.shapes.viewmodel.MenuViewModel
+import com.gena.shapes.viewmodel.ShapesViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.toast
 import pl.aprilapps.easyphotopicker.DefaultCallback
@@ -29,10 +32,9 @@ import java.io.File
  */
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var mInteractor: IInteractor
-    private var mCenterX: Int = 0
-    private var mCenterY: Int = 0
-    private lateinit var mViewModel: ShapesViewModel
+    private lateinit var mShapesViewModel: ShapesViewModel
+    private lateinit var mMenuViewModel: MenuViewModel
+    private lateinit var mShapesHistoryInteractor: IShapesHistoryInteractor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,13 +57,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupView() {
-        mViewModel = getViewModel { ShapesViewModel(application, ShapesApplication.repository) }.apply {
+        mMenuViewModel = getViewModel { MenuViewModel() }.apply {
             actionsAvailability.setObserver(this@MainActivity, { value -> value?.apply { invalidateOptionsMenu() } })
-            shapesToRefresh.setObserver(this@MainActivity, { value -> redrawShapes(value) })
+        }
+        val errorViewModel = getViewModel { ErrorViewModel() }.apply {
             errorEvent.setObserver(this@MainActivity, { value -> showErrorToast(value) })
         }
-        mInteractor = mViewModel.interactor
-        viewPanel.setInteractor(mInteractor)
+        mShapesViewModel = getViewModel { ShapesViewModel(ShapesApplication.repository, mMenuViewModel.presenter, errorViewModel.presenter) }.apply {
+            shapesToRefresh.setObserver(this@MainActivity, { value -> redrawShapes(value) })
+        }
+        mShapesHistoryInteractor = mShapesViewModel.shapesHistoryInteractor
+        viewPanel.setInteractor(mShapesViewModel.selectionInteractor)
     }
 
     private fun redrawShapes(model: ShapesModel?) {
@@ -72,12 +78,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        mInteractor.startObserving()
+        mShapesHistoryInteractor.startObserving()
     }
 
     override fun onPause() {
-        mInteractor.stopObserving()
-        mInteractor.saveShapes()
+        mShapesHistoryInteractor.stopObserving()
+        mShapesHistoryInteractor.saveShapes()
         super.onPause()
     }
 
@@ -89,7 +95,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         menu ?: return super.onPrepareOptionsMenu(menu)
         var result = false
-        mViewModel.actionsAvailability.value?.forEach { (menuCommand, available) ->
+        mMenuViewModel.actionsAvailability.value?.forEach { (menuCommand, available) ->
             menuCommand?.apply {
                 result = menu.setMenuItemAvailability(this.toResId(), available)
             }
@@ -120,9 +126,12 @@ class MainActivity : AppCompatActivity() {
         R.id.action_rectangle -> execMenuCommand { addShape(ShapeType.RECTANGLE) }
         R.id.action_oval -> execMenuCommand { addShape(ShapeType.OVAL) }
         R.id.action_picture -> execMenuCommand { getPicture() }
-        R.id.action_undo -> execMenuCommand { mInteractor.undo() }
-        R.id.action_redo -> execMenuCommand { mInteractor.redo() }
-        R.id.action_delete -> execMenuCommand { mInteractor.deleteSelected() }
+        R.id.action_undo -> execMenuCommand { mShapesHistoryInteractor.undo() }
+        R.id.action_redo -> execMenuCommand { mShapesHistoryInteractor.redo() }
+        R.id.action_delete -> execMenuCommand {
+            mShapesHistoryInteractor.deleteSelected()
+            viewPanel.deleteSelectedFromCache()
+        }
         else -> super.onOptionsItemSelected(item)
     }
 
@@ -132,7 +141,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addShape(type: ShapeType) =
-            mInteractor.addShape(type, mCenterX, mCenterY)
+            mShapesHistoryInteractor.addShape(type)
 
     private fun getPicture() {
         EasyImage.openGallery(this, 0)
@@ -151,8 +160,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onImagePickerError(e: Exception?, source: EasyImage.ImageSource?, type: Int) {
-                //Some error handling
-                e!!.printStackTrace()
+                e?.printStackTrace()
             }
 
             override fun onCanceled(source: EasyImage.ImageSource?, type: Int) {
@@ -167,7 +175,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun onPhotosReturned(returnedPhoto: File?) {
         returnedPhoto ?: return
-        mInteractor.addPicture(mCenterX, mCenterY, returnedPhoto.absolutePath)
+        mShapesHistoryInteractor.addPicture(returnedPhoto.absolutePath)
     }
 
     private fun showErrorToast(error: ShapeError?) {

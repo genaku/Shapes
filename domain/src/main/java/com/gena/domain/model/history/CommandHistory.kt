@@ -11,7 +11,7 @@ import com.gena.domain.model.ShapesModel
  */
 class CommandHistory(
         val model: ShapesModel,
-        val historyList: ArrayList<Command> = ArrayList(),
+        private val historyList: ArrayList<Command> = ArrayList(),
         initialHistoryPos: Int = -1
 ) : ObservableModel() {
 
@@ -33,16 +33,19 @@ class CommandHistory(
 
     @Throws(ShapeException::class)
     fun saveCommand(command: Command) {
+        clearObsoleteHistory()
+        historyList.add(command)
+        mHistoryPos = historyList.size - 1
+        notifyChanged()
+    }
+
+    private fun clearObsoleteHistory() {
         // clear history after mHistoryPos
         var i = historyList.size - 1
         while (historyList.size > mHistoryPos + 1 && i >= 0) {
             historyList.removeAt(i)
             i--
         }
-        // add command
-        historyList.add(command)
-        mHistoryPos = historyList.size - 1
-        notifyChanged()
     }
 
     @Throws(ShapeException::class)

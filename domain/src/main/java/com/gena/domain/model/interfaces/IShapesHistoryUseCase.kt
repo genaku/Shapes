@@ -6,16 +6,13 @@ import com.gena.domain.consts.ShapeType
  * Created by Gena Kuchergin on 12.02.2018.
  * © 2018 Gena Kuchergin. All Rights Reserved.
  */
-interface IUseCase {
+interface IShapesHistoryUseCase {
     fun startObserving()
     fun stopObserving()
-    fun addShape(type: ShapeType, x0: Int, y0: Int)
-    fun addPicture(x0: Int, y0: Int, filename: String)
+    fun addShape(type: ShapeType)
+    fun addPicture(filename: String)
     fun deleteSelected()
+    fun saveShapes()
     fun undo()
     fun redo()
-    fun saveModel()
-    fun moveSelected(x: Int, y: Int)
-    fun movementFinished()
-    fun findSelection(x: Int, y: Int)
 }
