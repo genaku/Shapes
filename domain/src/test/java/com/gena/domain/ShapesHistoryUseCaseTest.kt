@@ -9,6 +9,7 @@ import com.gena.domain.model.KeyData
 import com.gena.domain.model.MenuCommand
 import com.gena.domain.model.ShapesModel
 import com.gena.domain.model.figures.PictureData
+import com.gena.domain.model.figures.Shape
 import com.gena.domain.model.history.CommandHistory
 import com.gena.domain.model.history.CommandMove
 import com.gena.domain.usecases.ShapesHistoryUseCase
@@ -88,17 +89,17 @@ class ShapesHistoryUseCaseTest {
 
                 useCase.execTempCommand(command)
                 useCase.saveCommandToHistory(command)
-                val newShape = shapesPresenter.shapesModel.getItem(key)
+                val newShape = shapesPresenter.getShape(key)
                 newShape.left eq newX
                 newShape.top eq newY
 
                 useCase.undo()
-                val undoShape = shapesPresenter.shapesModel.getItem(key)
+                val undoShape = shapesPresenter.getShape(key)
                 undoShape.left eq oldX
                 undoShape.top eq oldY
 
                 useCase.redo()
-                val redoShape = shapesPresenter.shapesModel.getItem(key)
+                val redoShape = shapesPresenter.getShape(key)
                 redoShape.left eq newX
                 redoShape.top eq newY
             }
@@ -159,6 +160,9 @@ class ShapesHistoryUseCaseTest {
         override fun refreshShapes(shapes: ShapesModel) {
             mShapesModel = shapes
         }
+
+        fun getShape(keyData: KeyData): Shape =
+                mShapesModel.getItem(keyData)
     }
 
     private class MockMenuPresenter : IMenuPresenter {
