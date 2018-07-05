@@ -2,6 +2,7 @@ package com.gena.domain
 
 import android.support.v4.util.ArrayMap
 import com.gena.domain.consts.ShapeError
+import com.gena.domain.consts.ShapeMoveMode
 import com.gena.domain.consts.ShapeType
 import com.gena.domain.model.Constants
 import com.gena.domain.model.KeyData
@@ -9,6 +10,7 @@ import com.gena.domain.model.MenuCommand
 import com.gena.domain.model.ShapesModel
 import com.gena.domain.model.figures.PictureData
 import com.gena.domain.model.history.CommandHistory
+import com.gena.domain.model.history.CommandMove
 import com.gena.domain.usecases.ShapesHistoryUseCase
 import com.gena.domain.usecases.interfaces.IErrorPresenter
 import com.gena.domain.usecases.interfaces.IMenuPresenter
@@ -70,6 +72,35 @@ class ShapesHistoryUseCaseTest {
                 errorPresenter.error eq null
                 shapesPresenter.shapesModel.items.size eq 2
                 shapesPresenter.shapesModel.selectedKey eq KeyData(1)
+            }
+
+            "test shape move and undo move whole body then redo" o {
+                useCase.addShape(ShapeType.RECTANGLE)
+                useCase.addShape(ShapeType.OVAL)
+                val model = shapesPresenter.shapesModel
+                val key = model.selectedKey
+                val shape = model.getItem(key)
+                val oldX = shape.left
+                val oldY = shape.top
+                val newX = oldX + 10
+                val newY = oldY + 20
+                val command = CommandMove(key, ShapeMoveMode.BODY, oldX, oldY, newX, newY)
+
+                useCase.execTempCommand(command)
+                useCase.saveCommandToHistory(command)
+                val newShape = shapesPresenter.shapesModel.getItem(key)
+                newShape.left eq newX
+                newShape.top eq newY
+
+                useCase.undo()
+                val undoShape = shapesPresenter.shapesModel.getItem(key)
+                undoShape.left eq oldX
+                undoShape.top eq oldY
+
+                useCase.redo()
+                val redoShape = shapesPresenter.shapesModel.getItem(key)
+                redoShape.left eq newX
+                redoShape.top eq newY
             }
 
             useCase.stopObserving()
