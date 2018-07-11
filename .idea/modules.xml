@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/shapes.iml" filepath="$PROJECT_DIR$/shapes.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/domain/domain.iml" filepath="$PROJECT_DIR$/domain/domain.iml" />
       <module fileurl="file://$PROJECT_DIR$/interactors/interactors.iml" filepath="$PROJECT_DIR$/interactors/interactors.iml" />
       <module fileurl="file://$PROJECT_DIR$/presenters/presenters.iml" filepath="$PROJECT_DIR$/presenters/presenters.iml" />
       <module fileurl="file://$PROJECT_DIR$/repository/repository.iml" filepath="$PROJECT_DIR$/repository/repository.iml" />
-      <module fileurl="file://$PROJECT_DIR$/shapes.iml" filepath="$PROJECT_DIR$/shapes.iml" />
     </modules>
   </component>
 </project>

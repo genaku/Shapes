@@ -58,13 +58,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupView() {
         mMenuViewModel = getViewModel { MenuViewModel() }.apply {
-            actionsAvailability.setObserver(this@MainActivity, { value -> value?.apply { invalidateOptionsMenu() } })
+            actionsAvailability.setObserver(this@MainActivity) { value -> value?.apply { invalidateOptionsMenu() } }
         }
         val errorViewModel = getViewModel { ErrorViewModel() }.apply {
-            errorEvent.setObserver(this@MainActivity, { value -> showErrorToast(value) })
+            errorEvent.setObserver(this@MainActivity) { value -> showErrorToast(value) }
         }
         mShapesViewModel = getViewModel { ShapesViewModel(ShapesApplication.repository, mMenuViewModel.presenter, errorViewModel.presenter) }.apply {
-            shapesToRefresh.setObserver(this@MainActivity, { value -> redrawShapes(value) })
+            shapesToRefresh.setObserver(this@MainActivity) { value -> redrawShapes(value) }
         }
         mShapesHistoryInteractor = mShapesViewModel.shapesHistoryInteractor
         viewPanel.setInteractor(mShapesViewModel.selectionInteractor)
@@ -128,10 +128,7 @@ class MainActivity : AppCompatActivity() {
         R.id.action_picture -> execMenuCommand { getPicture() }
         R.id.action_undo -> execMenuCommand { mShapesHistoryInteractor.undo() }
         R.id.action_redo -> execMenuCommand { mShapesHistoryInteractor.redo() }
-        R.id.action_delete -> execMenuCommand {
-            mShapesHistoryInteractor.deleteSelected()
-            viewPanel.deleteSelectedFromCache()
-        }
+        R.id.action_delete -> execMenuCommand { mShapesHistoryInteractor.deleteSelected() }
         else -> super.onOptionsItemSelected(item)
     }
 

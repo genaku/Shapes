@@ -28,8 +28,6 @@ sealed class UIShape(
         style = Paint.Style.FILL_AND_STROKE
         isAntiAlias = true
     }
-
-    open fun onDelete() {}
 }
 
 class UIRectangle(
@@ -68,21 +66,20 @@ class UIPicture(
         color: Int
 ) : UIShape(picture, centerX, centerY, color) {
 
-    private var mBitmap = loadBitmap()
+    val key = picture.filename.hashCode()
 
-    val bitmap
-        get() = mBitmap
+    val bitmap = loadBitmap()
 
-    override fun onDelete() {
-        ImageCache.deleteFromCache(picture.filename)
+    fun onDelete() {
+        ImageCache.deleteFromCache(key)
     }
 
     private fun loadBitmap(): Bitmap? {
-        var bitmap = ImageCache.getFromCache(picture.filename, picture.width, picture.height)
+        var bitmap = ImageCache.getFromCache(key, picture.width, picture.height)
         if (bitmap == null) {
             bitmap = tryToCreateBmp()
             if (bitmap != null) {
-                ImageCache.addToCache(picture.filename, bitmap)
+                ImageCache.addToCache(key, bitmap)
             }
         }
         return bitmap

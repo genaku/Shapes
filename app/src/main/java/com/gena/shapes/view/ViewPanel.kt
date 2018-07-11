@@ -7,7 +7,6 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import com.gena.domain.model.Constants.Companion.NO_SELECTED
 import com.gena.domain.model.ShapesModel
 import com.gena.domain.model.figures.*
 import com.gena.domain.usecases.interfaces.ISelectionInteractor
@@ -38,6 +37,8 @@ class ViewPanel : View {
     private var mModelWeakRef: WeakReference<ShapesModel> = WeakReference(ShapesModel())
     private var uiShapes: ArrayList<UIShape> = ArrayList()
 
+    private val mPictures = HashMap<Int, UIPicture>()
+
     constructor(context: Context) : super(context) {
         init()
     }
@@ -62,13 +63,33 @@ class ViewPanel : View {
 
     private fun prepareUiItems() {
         val items = mModelWeakRef.get()?.items ?: ArrayList()
+        val oldImages = getOldImages()
         uiShapes = items.mapTo(ArrayList()) { shape ->
             when (shape) {
                 is Rectangle -> UIRectangle(shape, mCenterX, mCenterY, mRectangleColor)
                 is Triangle -> UITriangle(shape, mCenterX, mCenterY, mTriangleColor)
                 is Oval -> UIOval(shape, mCenterX, mCenterY, mOvalColor)
-                is Picture -> UIPicture(shape, mCenterX, mCenterY, mPictureColor)
+                is Picture -> getUiPicture(shape, oldImages)
             }
+        }
+        removeOldImages(oldImages)
+    }
+
+    private fun getOldImages(): HashMap<Int, UIPicture> {
+        return HashMap(mPictures)
+    }
+
+    private fun getUiPicture(picture: Picture, oldImages: HashMap<Int, UIPicture>): UIPicture {
+        val uiPicture = UIPicture(picture, mCenterX, mCenterY, mPictureColor)
+        oldImages.remove(uiPicture.key)
+        mPictures[uiPicture.key] = uiPicture
+        return uiPicture
+    }
+
+    private fun removeOldImages(oldImages: HashMap<Int, UIPicture>) {
+        for (oldImage in oldImages) {
+            oldImage.value.onDelete()
+            mPictures.remove(oldImage.key)
         }
     }
 
@@ -87,21 +108,29 @@ class ViewPanel : View {
         super.onDraw(canvas)
         canvas ?: return
 
-        // clear background
+        clearCanvas(canvas)
+        drawAllShapes(canvas)
+        drawSelector(canvas)
+    }
+
+    private fun clearCanvas(canvas: Canvas) {
         canvas.drawPaint(mBackgroundPaint)
+    }
 
-        val selectedIdx = mModelWeakRef.get()?.selectedKey?.idx ?: -1
-
-        // show all shapes
+    private fun drawAllShapes(canvas: Canvas) {
         for (i in 0 until uiShapes.size) {
             getItem(i)?.apply {
                 this.draw(canvas)
-                if (i == selectedIdx) {
-                    mDrawSelector.drawSelector(canvas,
-                            left, top, right, bottom,
-                            mSelectorColor)
-                }
             }
+        }
+    }
+
+    private fun drawSelector(canvas: Canvas) {
+        val selectedIdx = mModelWeakRef.get()?.selectedKey?.idx ?: -1
+        getItem(selectedIdx)?.apply {
+            mDrawSelector.drawSelector(canvas,
+                    left, top, right, bottom,
+                    mSelectorColor)
         }
     }
 
@@ -143,16 +172,7 @@ class ViewPanel : View {
     }
 
     private fun yToPY(y: Float): Int {
-        val py = (y - mCenterY).toInt()
-        return py
-    }
-
-    fun deleteSelectedFromCache() {
-        val selectedKey = mModelWeakRef.get()?.selectedKey ?: return
-        if (selectedKey == NO_SELECTED) {
-            return
-        }
-        getItem(selectedKey.idx)?.onDelete()
+        return (y - mCenterY).toInt()
     }
 
 }

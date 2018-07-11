@@ -14,6 +14,7 @@ class DrawSelector : IDrawSelector {
         val paint = Paint()
         paint.style = Paint.Style.STROKE
         paint.color = color
+        paint.strokeWidth = Constants.SELECTOR_WIDTH
         canvas.drawRect(left, top, right, bottom, paint)
 
         paint.style = Paint.Style.FILL
