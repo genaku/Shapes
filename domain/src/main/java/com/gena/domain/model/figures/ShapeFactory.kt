@@ -14,12 +14,5 @@ class ShapeFactory {
             ShapeType.TRIANGLE -> Triangle()
             ShapeType.PICTURE -> TODO()
         }
-
-        fun createShape(shapeData: ShapeData): Shape = when (shapeData.type) {
-            ShapeType.RECTANGLE -> Rectangle(shapeData)
-            ShapeType.OVAL -> Oval(shapeData)
-            ShapeType.TRIANGLE -> Triangle(shapeData)
-            ShapeType.PICTURE -> Picture(shapeData)
-        }
     }
 }

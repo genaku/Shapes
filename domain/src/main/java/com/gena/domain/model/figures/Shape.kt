@@ -156,19 +156,13 @@ class Triangle(data: ShapeData = ShapeData(
     }
 }
 
-class Picture : Shape {
-
-    constructor(data: ShapeData) : super(data)
-
-    constructor(pictureData: PictureData) :
-            super(ShapeData(
-                    type = ShapeType.PICTURE,
-                    bottomRight = Point(pictureData.width, pictureData.height),
-                    filename = pictureData.filename)
-            )
+class Picture(private val pictureData: PictureData) : Shape(ShapeData(
+        type = ShapeType.PICTURE,
+        bottomRight = Point(pictureData.width, pictureData.height))
+) {
 
     val filename
-        get() = data.filename
+        get() = pictureData.filename
 
     companion object {
         private const val serialVersionUID = -7893724938095347677L
